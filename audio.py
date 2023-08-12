@@ -2,13 +2,11 @@
 
 import whisperx
 from whisperx import types as whisperx_types
-from machine import get_optimal_device,get_optimal_compute_type,clear_gpu,T_Device,T_Compute_Type
+from machine import get_optimal_device,get_optimal_compute_type,clear_gpu,T_Device,T_Compute_Type,T_Model
 
 def transcribe(
         audio_filepath:str,
-        hf_access_token:str,
-        min_speakers: int | None = None,
-        max_speakers: int | None = None,
+        whisper_model: T_Model,
         batch_size: int = 16,
         device: T_Device | None = None,
         compute_type: T_Compute_Type | None = None,
@@ -29,7 +27,7 @@ def transcribe(
         audio = whisperx.load_audio(audio_filepath)
 
         #transcribe
-        model_transcribe = whisperx.load_model("base",device,compute_type=compute_type)
+        model_transcribe = whisperx.load_model(whisper_model,device,compute_type=compute_type)
         result = model_transcribe.transcribe(audio=audio,batch_size=batch_size)
 
         if debug_mode:
@@ -44,15 +42,6 @@ def transcribe(
         if debug_mode:
             print("ALIGNED")
         clear_gpu()
-
-        #diarize
-        model_diarize = whisperx.DiarizationPipeline(use_auth_token=hf_access_token, device=device)
-        diarized_segments = model_diarize(audio=audio,min_speakers=min_speakers,max_speakers=max_speakers)
-
-        if debug_mode:
-            print("DIARIZED")
-
-        whisperx.assign_word_speakers(diarized_segments,result)
 
         return result
 
@@ -81,6 +70,8 @@ def diarize(
         if debug_mode:
             print("DIARIZED")
 
+        clear_gpu()
+
         whisperx.assign_word_speakers(diarized_segments,transcription_result)
 
         return transcription_result
@@ -89,6 +80,7 @@ def diarize(
 def transcribe_diarized(
         audio_filepath:str,
         hf_access_token:str,
+        whisper_model: T_Model = "medium",
         min_speakers: int | None = None,
         max_speakers: int | None = None,
         batch_size: int = 16,
@@ -108,9 +100,7 @@ def transcribe_diarized(
         #transcribe
         aligned_transcription = transcribe(
              audio_filepath=audio_filepath,
-             hf_access_token=hf_access_token,
-             min_speakers=min_speakers,
-             max_speakers=max_speakers,
+             whisper_model=whisper_model,
              batch_size=batch_size,
              device=device,
              compute_type=compute_type,

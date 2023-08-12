@@ -9,6 +9,7 @@ import gc
 
 T_Device = Literal["cpu","cuda"]
 T_Compute_Type = Literal["int8","float16","float32"]
+T_Model = Literal["tiny","base","medium","large","large-v2"]
 
 
 
