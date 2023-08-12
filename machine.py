@@ -5,9 +5,17 @@ from typing import Literal
 import gc
 
 
+### TYPING ###
+
+T_Device = Literal["cpu","cuda"]
+T_Compute_Type = Literal["int8","float16","float32"]
+
+
+
+
 ### SETUP CONFIGURATION ###
 
-def get_optimal_device() -> Literal["cpu","cuda"]:
+def get_optimal_device() -> T_Device:
     """select the optimal supported device available on the running machine"""
     if  torch.cuda.is_available():
         return "cuda"
@@ -15,7 +23,7 @@ def get_optimal_device() -> Literal["cpu","cuda"]:
         return "cpu"
     
 
-def get_optimal_compute_type() -> Literal["int8","float16","float32"]:
+def get_optimal_compute_type() -> T_Compute_Type:
     """select the optimal compute type available on the running machine"""
     #implement
     return "float32"
