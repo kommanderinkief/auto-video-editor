@@ -1,5 +1,5 @@
 import whisperx
-from machine import get_optimal_device,get_optimal_compute_type
+from machine import get_optimal_device,get_optimal_compute_type,clear_gpu
 
 hf_access_token = ""
 
@@ -19,15 +19,22 @@ audio = whisperx.load_audio(audio_file)
 model_transcribe = whisperx.load_model("base",device,compute_type=compute_type)
 result = model_transcribe.transcribe(audio=audio,batch_size=batch_size)
 
+print("TRANSCRIBED")
+clear_gpu()
+
 
 #align whisper output
 model_alignment, alignment_metadata = whisperx.load_align_model(language_code=result["language"],device=device)
 result = whisperx.align(result["segments"], model=model_alignment, align_model_metadata=alignment_metadata, audio=audio, device=device, return_char_alignments=False)
 
+print("ALIGNED")
+clear_gpu()
 
 #diarize
 model_diarize = whisperx.DiarizationPipeline(use_auth_token=hf_access_token, device=device)
 diarized_segments = model_diarize(audio=audio,min_speakers=min_speakers,max_speakers=max_speakers)
+
+print("DIARIZED")
 
 whisperx.assign_word_speakers(diarized_segments,result)
 
