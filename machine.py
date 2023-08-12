@@ -13,6 +13,6 @@ def get_optimal_device() -> Literal["cpu","cuda"]:
     
 
 def get_optimal_compute_type() -> Literal["int8","float16","float32"]:
-    """select the optimal compute type"""
+    """select the optimal compute type available on the running machine"""
     #implement
     return "float32"

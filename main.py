@@ -1,16 +1,15 @@
 import whisperx
-from machine_setup import get_optimal_device,get_optimal_compute_type
+from machine import get_optimal_device,get_optimal_compute_type
 
 hf_access_token = ""
 
 device = get_optimal_device()
 audio_file = "media\\audio.wav"
-batch_size = 16 #reduce if low gpu mem
+batch_size = 16 #reduce if low gpu mem / increase if high
 compute_type = get_optimal_compute_type()
 
 min_speakers : None | int = None
 max_speakers : None | int = None
-
 
 
 #load target audio
