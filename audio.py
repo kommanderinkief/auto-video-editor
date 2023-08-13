@@ -9,6 +9,7 @@ from machine import get_optimal_device,get_optimal_compute_type,clear_gpu,T_Devi
 def transcribe(
         audio_filepath:str,
         whisper_model: T_Model,
+        language:str | None = None,
         batch_size: int = 16,
         device: T_Device | None = None,
         compute_type: T_Compute_Type | None = None,
@@ -29,7 +30,7 @@ def transcribe(
         audio = whisperx.load_audio(audio_filepath)
 
         #transcribe
-        model_transcribe = whisperx.load_model(whisper_model,device,compute_type=compute_type)
+        model_transcribe = whisperx.load_model(whisper_model,device,compute_type=compute_type,language=language)
         result = model_transcribe.transcribe(audio=audio,batch_size=batch_size)
 
         if debug_mode:
@@ -150,7 +151,7 @@ def extract_speaker_segments_to(speaker_id:str,diarized_transcription:whisperx_t
     out_dir = str(pathlib.Path(out_dir).resolve())
 
     #create the specified directory if does not already exist
-    pathlib.Path(out_dir).mkdir(parents=True)
+    pathlib.Path(out_dir).mkdir(parents=True,exist_ok=True)
 
     #generate sub-clips and export to specified directory
     generated_filepaths = []
