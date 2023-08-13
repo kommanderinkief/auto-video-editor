@@ -1,6 +1,8 @@
 """interaction with audio"""
 
 import whisperx
+from pydub import AudioSegment
+import pathlib
 from whisperx import types as whisperx_types
 from machine import get_optimal_device,get_optimal_compute_type,clear_gpu,T_Device,T_Compute_Type,T_Model
 
@@ -121,6 +123,58 @@ def transcribe_diarized(
 
 
         return diarized_transcription
+
+# TODO
+# create accurate return typings which accounts for implementation of 'speaker' attribute, post diarization.
+
+def filter_segments_to_only_speaker(speaker_id:str,diarized_transcription:whisperx_types.AlignedTranscriptionResult | whisperx_types.TranscriptionResult):
+    """select only segments in which the speaker specified by speaker_id speaks within the passed diarized transcription"""
+
+    filter_lambda = lambda segment: "speaker" in segment.keys() and segment["speaker"] == speaker_id
+    
+    filtered =  filter(filter_lambda,diarized_transcription["segments"])
+    
+    return list(filtered)
+
+
+def extract_speaker_segments_to(speaker_id:str,diarized_transcription:whisperx_types.AlignedTranscriptionResult | whisperx_types.TranscriptionResult,originating_audio_clip_filepath:str,out_dir:str) -> list[str]:
+    """save all audio clips in which the specified speaker is speaking, to a specified directory. Returns a list of all filepaths of created audio clips"""
+    
+    #fetch target segments (the segments in which the specified speaker is speaking)
+    target_segments = filter_segments_to_only_speaker(speaker_id=speaker_id,diarized_transcription=diarized_transcription)
+    
+    #load audio
+    audio = AudioSegment.from_file(originating_audio_clip_filepath)
+    
+    #transform out_dir to absolute path
+    out_dir = str(pathlib.Path(out_dir).resolve())
+
+    #create the specified directory if does not already exist
+    pathlib.Path(out_dir).mkdir(parents=True)
+
+    #generate sub-clips and export to specified directory
+    generated_filepaths = []
+    for i,segment in enumerate(target_segments):
+        start = segment["start"] * 1000
+        end = segment["end"] * 1000
+
+        trimmed_audio : AudioSegment = audio[start:end]
+
+        format = "mp3"
+        filename = f"clip-{segment['speaker']}-{i:03}" + f".{format}"
+        filepath = str(pathlib.Path(out_dir).joinpath(filename))
+
+        trimmed_audio.export(filepath,format=format)
+
+        generated_filepaths.append(filepath)
+
+    return generated_filepaths
+        
+         
+     
+
+
+
 
 
      
