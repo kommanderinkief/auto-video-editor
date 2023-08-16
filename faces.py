@@ -1,15 +1,14 @@
 import face_recognition
 import cv2
+from PIL import Image
 
 
 #TODO 
-# currently frame seems to be blue
-# add step so can read not every frame (increase speed)
 # add minimum face size such that faces of a small size can be optionally ignored.
 # convert frame to greyscale to improve accuracy (convert back when saving image)
 
 #return list of numpy arrays
-def get_all_faces(video_filepath:str,time_step:int = 1) -> list[any]: 
+def get_all_faces(video_filepath:str,time_step:int = 1,min_face_area_percentage:float | None = None, min_face_width: int | None = None, min_face_height: int | None = None) -> list[any]: 
     """"""
     cap = cv2.VideoCapture(video_filepath)
 
@@ -41,6 +40,34 @@ def get_all_faces(video_filepath:str,time_step:int = 1) -> list[any]:
         frame_face_encodings = face_recognition.face_encodings(face_image=frame,known_face_locations=frame_face_locations)
 
         for i,face_encoding in enumerate(frame_face_encodings):
+            #face dimensions in frame
+            face_pos_top,face_pos_right,face_pos_bottom,face_pos_left = frame_face_locations[i]
+            face_height = face_pos_bottom - face_pos_top
+            face_width = face_pos_right - face_pos_left
+            face_area = face_width * face_height
+            
+            ## check for invalid faces based on desired minimum face dimensions
+
+            if not min_face_area_percentage == None:
+                #get frame dimensions / area
+                frame_width, frame_height = frame.shape[:2]
+                frame_area = frame_width * frame_height
+
+                #calculate face area as a percentage of frame
+                face_area_percentage = face_area / frame_area
+
+                if face_area_percentage < min_face_area_percentage:
+                    #ignore face
+                    continue
+
+            elif min_face_height != None or min_face_width != None:
+                if min_face_height != None and face_height < min_face_height:
+                    #ignore face
+                    continue
+                elif min_face_width != None and face_width < min_face_width:
+                    #ignore face
+                    continue
+
 
             # compare face-encodings within current frame, against already identified encodings
             matches = face_recognition.compare_faces(distinctive_face_encodings,face_encoding)
@@ -58,4 +85,8 @@ def get_all_faces(video_filepath:str,time_step:int = 1) -> list[any]:
 
 
 if __name__ == "__main__":
-    get_all_faces("media\\clip.mp4")
+    _,face_images = get_all_faces("media\\clip.mp4",min_face_area_percentage=0.005)
+
+    for image in face_images:
+        im = Image.fromarray(image)
+        im.show()
