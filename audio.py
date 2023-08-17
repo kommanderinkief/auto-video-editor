@@ -31,7 +31,7 @@ def transcribe(
 
 
         #load target audio
-        audio_filepath = "C:/Users/BIDENDREAMERS/Document/GitHub/auto-video-editor/AudioRecording.wav"
+        audio_filepath = "C:/Users/BIDENDREAMERS/Document/GitHub/auto-video-editor/AudioRecording.mp3"
         ffmpeg_executable = "C:/ffmpeg-master-latest-win64-gpl/bin"  # Replace with the actual path
         # Load audio using torchaudio
         import torchaudio

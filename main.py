@@ -8,7 +8,7 @@ torchaudio.set_audio_backend("soundfile")
 
 hf_access_token = ""  # https://huggingface.co/settings/tokens
 
-audio_file = "AudioRecording.wav"
+audio_file = "AudioRecording.mp3"
 
 batch_size = 16  # reduce if low GPU mem / increase if high
 compute_type = "float32"
